@@ -3,7 +3,7 @@ import { Container, Button, Spinner, Alert, Card, Badge } from 'react-bootstrap'
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
 
-const API_BASE = 'http://localhost:3010';
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:3010';
 
 interface InterviewStep {
   id: number;
@@ -86,6 +86,29 @@ const PositionDetail: React.FC = () => {
 
     fetchData();
   }, [id]);
+
+  const handleKeyboardMove = async (candidate: Candidate, targetStep: InterviewStep) => {
+    if (candidate.currentInterviewStep === targetStep.name) return;
+
+    const prevStepName = candidate.currentInterviewStep;
+    setCandidates(prev =>
+      prev.map(c => c.id === candidate.id ? { ...c, currentInterviewStep: targetStep.name } : c)
+    );
+
+    try {
+      const res = await fetch(`${API_BASE}/candidates/${candidate.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId: candidate.applicationId, currentInterviewStep: targetStep.id }),
+      });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+    } catch {
+      setCandidates(prev =>
+        prev.map(c => c.id === candidate.id ? { ...c, currentInterviewStep: prevStepName } : c)
+      );
+      setError('Error al actualizar la fase del candidato. El cambio ha sido revertido.');
+    }
+  };
 
   const handleDragStart = (e: React.DragEvent, candidateId: number) => {
     setDraggingId(candidateId);
@@ -243,6 +266,19 @@ const PositionDetail: React.FC = () => {
                         <Card.Body className="py-2 px-3">
                           <div className="fw-medium small">{candidate.fullName}</div>
                           <ScoreDots score={candidate.averageScore} />
+                          <select
+                            className="visually-hidden"
+                            aria-label={`Move ${candidate.fullName} to another phase`}
+                            value={candidate.currentInterviewStep}
+                            onChange={e => {
+                              const target = steps.find(s => s.name === e.target.value);
+                              if (target) handleKeyboardMove(candidate, target);
+                            }}
+                          >
+                            {steps.map(s => (
+                              <option key={s.id} value={s.name}>{s.name}</option>
+                            ))}
+                          </select>
                         </Card.Body>
                       </Card>
                     ))}
