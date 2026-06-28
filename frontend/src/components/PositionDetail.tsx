@@ -110,6 +110,17 @@ const PositionDetail: React.FC = () => {
     }
   };
 
+  const handleCardKeyDown = (e: React.KeyboardEvent, candidate: Candidate) => {
+    const currentIndex = steps.findIndex(s => s.name === candidate.currentInterviewStep);
+    if (e.key === 'ArrowRight' && currentIndex < steps.length - 1) {
+      e.preventDefault();
+      handleKeyboardMove(candidate, steps[currentIndex + 1]);
+    } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+      e.preventDefault();
+      handleKeyboardMove(candidate, steps[currentIndex - 1]);
+    }
+  };
+
   const handleDragStart = (e: React.DragEvent, candidateId: number) => {
     setDraggingId(candidateId);
     e.dataTransfer.effectAllowed = 'move';
@@ -202,6 +213,10 @@ const PositionDetail: React.FC = () => {
         .candidate-card.is-dragging {
           opacity: 0.4;
         }
+        .candidate-card:focus {
+          outline: 2px solid #0d6efd;
+          outline-offset: 2px;
+        }
         .kanban-col-inner {
           background-color: #f8f9fa;
           border-radius: 8px;
@@ -260,8 +275,12 @@ const PositionDetail: React.FC = () => {
                         key={candidate.id}
                         className={`candidate-card shadow-sm ${draggingId === candidate.id ? 'is-dragging' : ''}`}
                         draggable
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`${candidate.fullName}, fase: ${candidate.currentInterviewStep}. Usa ← → para mover entre columnas.`}
                         onDragStart={e => handleDragStart(e, candidate.id)}
                         onDragEnd={handleDragEnd}
+                        onKeyDown={e => handleCardKeyDown(e, candidate)}
                       >
                         <Card.Body className="py-2 px-3">
                           <div className="fw-medium small">{candidate.fullName}</div>
