@@ -184,7 +184,9 @@ const PositionDetail: React.FC = () => {
   if (loading) {
     return (
       <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
-        <Spinner animation="border" variant="primary" />
+        <Spinner animation="border" variant="primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
       </Container>
     );
   }
@@ -265,7 +267,7 @@ const PositionDetail: React.FC = () => {
             >
               <div className={`kanban-col-inner p-2 ${isDropTarget ? 'drop-target' : ''}`} style={{ minHeight: 200 }}>
                   <div className="d-flex align-items-center justify-content-between mb-2 px-1">
-                    <span className="fw-semibold">{step.name}</span>
+                    <h6 className="fw-semibold mb-0">{step.name}</h6>
                     <Badge bg="secondary">{stepCandidates.length}</Badge>
                   </div>
 

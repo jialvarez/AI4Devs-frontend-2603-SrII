@@ -66,8 +66,8 @@ describe('PositionDetail', () => {
     mockSuccessfulFetch();
     renderWithRouter();
     await waitFor(() => {
-      expect(screen.getByText('Initial Screening')).toBeInTheDocument();
-      expect(screen.getByText('Technical Interview')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Initial Screening' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Technical Interview' })).toBeInTheDocument();
     });
   });
 
@@ -97,7 +97,9 @@ describe('PositionDetail', () => {
   });
 
   it('shows "Sin candidatos" in columns with no candidates', async () => {
-    mockSuccessfulFetch();
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockFlowResponse } as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => [mockCandidates[0]] } as Response);
     renderWithRouter();
     await waitFor(() => {
       expect(screen.getByText('Sin candidatos')).toBeInTheDocument();
